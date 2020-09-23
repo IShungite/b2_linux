@@ -149,6 +149,12 @@
         ```bash
         [root@node1 ~]# mkdir ~/.ssh
         [root@node1 ~]# touch ~/.ssh/authorized_keys
+        [root@node1 ~]# chmod 700 ~/.ssh
+        [root@node1 ~]# chmod 600 ~/.ssh/authorized_keys
+        ```
+        Modification du fichier ``/etc/ssh/sshd_config`
+        ```
+            PubkeyAuthentication yes
         ```
 
         **Sur le client**
@@ -195,3 +201,5 @@
         icmp-blocks:
         rich rules:
         ```
+
+## I. Setup serveur Web
