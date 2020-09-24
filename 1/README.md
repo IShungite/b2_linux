@@ -21,7 +21,7 @@
 
     * Création des dossiers de montage
 
-        `mkdir /srv/data1 /srv/data2`
+        `mkdir /srv/site1 /srv/site2`
 
     * Formatage des partitions
 
@@ -30,16 +30,16 @@
         
     * Montage des partitions
 
-        `mount /dev/data/lvol0 /srv/data1`
-        `mount /dev/data/lvol1 /srv/data2`
+        `mount /dev/data/lvol0 /srv/site1`
+        `mount /dev/data/lvol1 /srv/site2`
 
     * Définition d'un montage automatique lors du boot de la machine
         
-        Ajout des lignes `/dev/data/lvol0 /srv/data1 ext4 defaults 0 0` et `/dev/data/lvol1 /srv/data2 ext4 defaults 0 0` dans `/etc/fstab`
+        Ajout des lignes `/dev/data/lvol0 /srv/site1 ext4 defaults 0 0` et `/dev/data/lvol1 /srv/site2 ext4 defaults 0 0` dans `/etc/fstab`
     
     * Vérification
 
-        ```bash
+        ```
         [root@node1 ~]# mount -av
         /                        : ignored
         /boot                    : already mounted
@@ -56,7 +56,7 @@
 
     * Ping entre les VM
 
-        ```bash
+        ```
         [root@node1 ~]# ping 192.168.1.12
         PING 192.168.1.12 (192.168.1.12) 56(84) bytes of data.
         64 bytes from 192.168.1.12: icmp_seq=1 ttl=64 time=0.629 ms
@@ -72,7 +72,7 @@
 
     * Hostname des deux VM
 
-        ```bash
+        ```
         [root@node2 ~]# hostname
         node2.tp1.
         ```
@@ -81,19 +81,26 @@
 
     * Ajout d'un host des VM
 
-        ```bash
-        [root@node2 ~]# cat /etc/hosts
-        192.168.1.11 node1
-
+        ```
         [root@node1 ~]# cat /etc/hosts
-        192.168.1.12 node2
+        192.168.1.12 node2.tp1.b2
+        [root@node1 ~]# ping node2.tp1.b2
+        PING node2.tp1.b2 (192.168.1.12) 56(84) bytes of data.
+        64 bytes from node2.tp1.b2 (192.168.1.12): icmp_seq=1 ttl=64 time=0.583 ms
+
+        [root@node2 ~]# cat /etc/hosts
+        192.168.1.11 node1.tp1.b2
+        [root@node2 ~]# ping node1.tp1.b2
+        PING node1.tp1.b2 (192.168.1.11) 56(84) bytes of data.
+        64 bytes from node1.tp1.b2 (192.168.1.11): icmp_seq=1 ttl=64 time=0.399 ms
+
         ```
 
 * Un utilisateur administrateur est créé sur les deux machines (il peut exécuter des commandes sudo en tant que root)
 
     * Ajout d'un utilisateur
 
-        ```bash
+        ```
         [root@node1 ~]# adduser admin
         [root@node1 ~]# passwd admin
         Changing password for user admin.
@@ -110,7 +117,7 @@
 
     * Fichier config de enp0s8
 
-        ```bash
+        ```
         [admin@node1 ~]$ cat /etc/sysconfig/network-scripts/ifcfg-enp0s8
         NAME=enp0s8
         DEVICE=enp0s8
@@ -124,7 +131,7 @@
         
         * Status de ssh
 
-        ```bash
+        ```
         [admin@node1 ~]$ systemctl status sshd
         ? sshd.service - OpenSSH server daemon
         Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; vendor preset: enabled)
@@ -146,7 +153,7 @@
     * Setup des des clés ssh
 
         **Sur le serveur**
-        ```bash
+        ```
         [root@node1 ~]# mkdir ~/.ssh
         [root@node1 ~]# touch ~/.ssh/authorized_keys
         [root@node1 ~]# chmod 700 ~/.ssh
@@ -185,7 +192,7 @@
 
     * Affichage du pare-feu
 
-        ```bash
+        ```
         [root@node1 ~]# firewall-cmd --list-all
         public (active)
         target: default
@@ -203,3 +210,157 @@
         ```
 
 ## I. Setup serveur Web
+
+* Installer le serveur web NGINX sur node1.tp1.b2 (avec une commande yum install).
+  
+    ```
+    [root@node1 ~]# yum install -y epel-release
+    [root@node1 ~]# yum –y install nginx
+    ```
+
+* Faites en sorte que :
+  
+  * NGINX servent deux sites web, chacun possède un fichier unique index.html
+
+    ```
+    [root@node1 ~]# touch /srv/site1/index.html
+    [root@node1 ~]# touch /srv/site2/index.html
+    ```
+
+  * Les sites web doivent se trouver dans /srv/site1 et /srv/site2
+    * Les permissions sur ces dossiers doivent être le plus restrictif possible
+
+        ```
+        drwxr-xr-x.  3 nginx_user nginx_group 4096 Sep 24 10:12 site1
+        drwxr-xr-x.  3 nginx_user nginx_group 4096 Sep 24 10:12 site2
+
+        -rw-r--r--. 1 nginx_user nginx_group    13 Sep 24 10:12 index.html
+        ```
+    * Ces dossiers doivent appartenir à un utilisateur et un groupe spécifique
+
+        Ajout d'un utilisateur `nginx_user` ayant pour mot de passe `nginx_user`
+        ```
+        [root@node1 ~]# adduser nginx_user
+        [root@node1 ~]# passwd nginx_user
+
+        [root@node1 ~]# groupadd nginx_group
+
+        [root@node1 ~]# chown nginx_user:nginx_group /srv/site1
+        [root@node1 ~]# chown nginx_user:nginx_group /srv/site2
+        [root@node1 ~]# chown nginx_user:nginx_group /srv/site1/index.html
+        [root@node1 ~]# chown nginx_user:nginx_group /srv/site2/index.html
+        ```
+
+    * les sites doivent être servis en HTTPS sur le port 443 et en HTTP sur le port 80
+        
+        * n'oubliez pas d'ouvrir les ports firewall
+
+            ```
+            [root@node1 ~]# firewall-cmd --add-port=443/tcp --permanent
+            success
+            [root@node1 ~]# firewall-cmd --add-port=80/tcp --permanent
+            success
+            [root@node1 ~]# firewall-cmd --reload
+            ```
+
+        Génération d'une clé et d'un certificat
+        ```
+        [root@node1 ~]# openssl req -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout server.key -out server.crt
+        Generating a 2048 bit RSA private key
+        ..+++
+        ......+++
+        writing new private key to 'server.key'
+        -----
+        You are about to be asked to enter information that will be incorporated
+        into your certificate request.
+        What you are about to enter is what is called a Distinguished Name or a DN.
+        There are quite a few fields but you can leave some blank
+        For some fields there will be a default value,
+        If you enter '.', the field will be left blank.
+        -----
+        Country Name (2 letter code) [XX]:
+        State or Province Name (full name) []:
+        Locality Name (eg, city) [Default City]:
+        Organization Name (eg, company) [Default Company Ltd]:
+        Organizational Unit Name (eg, section) []:
+        Common Name (eg, your name or your server's hostname) []:node1.tp1.b2
+        Email Address []:
+
+        [root@node1 ~]# mv server.crt /etc/pki/tls/certs/node1.tp1.b2.crt
+        [root@node1 ~]# mv server.key /etc/pki/tls/private/node1.tp1.b2.key
+        ```
+
+        Fichier de configuration de nginx
+        ```
+        [root@node1 ~]# cat /etc/nginx/nginx.conf
+        user nginx_user;
+
+        worker_processes 1;
+        error_log nginx_error.log;
+        pid /run/nginx.pid;
+
+        events {
+            worker_connections 1024;
+        }
+
+        http {
+            server {
+                listen 80;
+
+                server_name node1.tp1.b2;
+
+                location / {
+                    return 301 /site1;
+                }
+
+                location /site1 {
+                    alias /srv/site1;
+                }
+                location /site2 {
+                    alias /srv/site2;
+                }
+            }
+            server {
+                listen 443 ssl;
+
+                server_name node1.tp1.b2;
+                ssl_certificate /etc/pki/tls/certs/node1.tp1.b2.crt;
+                ssl_certificate_key /etc/pki/tls/private/node1.tp1.b2.key;
+
+                location / {
+                    return 301 /site1;
+                }
+
+                location /site1 {
+                    alias /srv/site1;
+                }
+                location /site2 {
+                    alias /srv/site2;
+                }
+            }
+        }
+        ```
+*  Prouver que la machine node2 peut joindre les deux sites web.
+
+    ```
+    [root@node2 ~]# curl -kL https://node1.tp1.b2/site1
+    SITE 1
+    [root@node2 ~]# curl -kL https://node1.tp1.b2/site2
+    SITE 2
+    ```
+
+## II. Script de sauvegarde
+
+Caractéristiques du script :
+* s'appelle `tp1_backup.sh`
+* sauvegarde les deux sites web
+  * c'est à dire qu'il crée une archive compressée pour chacun des sites
+  * je vous conseille d'utiliser le format `tar` pour l'archivage et `gzip` pour la compression
+* les noms des archives doivent contenir le nom du site sauvegardé ainsi que la date et heure de la sauvegarde
+  * par exemple `site1_20200923_2358` (pour le 23 Septembre 2020 à 23h58)
+* vous ne devez garder que 7 exemplaires sauvegardes
+  * à la huitième sauvegarde réalisée, la plus ancienne est supprimée
+* le script ne sauvegarde qu'un dossier à la fois, le chemin vers ce dossier est passé en argument du script
+  * on peut donc appeler le script en faisant `tp1_backup.sh /srv/site1` afin de déclencher une sauvegarde de `/srv/site1`
+
+[Voir le script](tp1_backup.sh)
