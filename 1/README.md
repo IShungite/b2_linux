@@ -362,5 +362,5 @@
 * Le script sauvegarde un seul site à la fois en passant le dossier par argument
   * on peut donc appeler le script en faisant `tp1_backup.sh /srv/site1` afin de déclencher une sauvegarde de `/srv/site1`
 * Le script peut sauvegarder tous les sites en passant `all` comme argument
-
+* Le script écrit les logs dans le fichier `/var/log/backup.log`
 [Voir le script](tp1_backup.sh)

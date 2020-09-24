@@ -22,7 +22,7 @@ PATH_ARG=$1
 PATH_SITE1="/srv/site1"
 PATH_SITE2="/srv/site2"
 
-LOG_FILE="/srv/log_backup"
+LOG_FILE="/var/log/backup.log"
 
 echo "---- BACKUP SCRIPT START ----" >> ${LOG_FILE}
 
