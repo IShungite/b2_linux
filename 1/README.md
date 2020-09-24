@@ -340,7 +340,7 @@
             }
         }
         ```
-*  Prouver que la machine node2 peut joindre les deux sites web.
+*  Prouver que la machine node2 peut joindre les deux sites web
 
     ```
     [root@node2 ~]# curl -kL https://node1.tp1.b2/site1
@@ -351,16 +351,16 @@
 
 ## II. Script de sauvegarde
 
-Caractéristiques du script :
+**Caractéristiques du script**
 * s'appelle `tp1_backup.sh`
 * sauvegarde les deux sites web
   * c'est à dire qu'il crée une archive compressée pour chacun des sites
-  * je vous conseille d'utiliser le format `tar` pour l'archivage et `gzip` pour la compression
-* les noms des archives doivent contenir le nom du site sauvegardé ainsi que la date et heure de la sauvegarde
+* les noms des archives contiennent le nom du site sauvegardé ainsi que la date et heure de la sauvegarde
   * par exemple `site1_20200923_2358` (pour le 23 Septembre 2020 à 23h58)
-* vous ne devez garder que 7 exemplaires sauvegardes
+* Garde que 7 exemplaires de sauvegardes
   * à la huitième sauvegarde réalisée, la plus ancienne est supprimée
-* le script ne sauvegarde qu'un dossier à la fois, le chemin vers ce dossier est passé en argument du script
+* Le script sauvegarde un seul site à la fois en passant le dossier par argument
   * on peut donc appeler le script en faisant `tp1_backup.sh /srv/site1` afin de déclencher une sauvegarde de `/srv/site1`
+* Le script peut sauvegarder tous les sites en passant `all` comme argument
 
 [Voir le script](tp1_backup.sh)
