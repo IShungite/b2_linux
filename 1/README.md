@@ -245,6 +245,8 @@
 
         [root@node1 ~]# groupadd nginx_group
 
+        [root@node1 ~]# gpasswd -a nginx_user nginx_group
+
         [root@node1 ~]# chown nginx_user:nginx_group /srv/site1
         [root@node1 ~]# chown nginx_user:nginx_group /srv/site2
         [root@node1 ~]# chown nginx_user:nginx_group /srv/site1/index.html
@@ -351,16 +353,52 @@
 
 ## II. Script de sauvegarde
 
-**Caractéristiques du script**
-* s'appelle `tp1_backup.sh`
-* sauvegarde les deux sites web
-  * c'est à dire qu'il crée une archive compressée pour chacun des sites
-* les noms des archives contiennent le nom du site sauvegardé ainsi que la date et heure de la sauvegarde
-  * par exemple `site1_20200923_2358` (pour le 23 Septembre 2020 à 23h58)
-* Garde que 7 exemplaires de sauvegardes
-  * à la huitième sauvegarde réalisée, la plus ancienne est supprimée
-* Le script sauvegarde un seul site à la fois en passant le dossier par argument
-  * on peut donc appeler le script en faisant `tp1_backup.sh /srv/site1` afin de déclencher une sauvegarde de `/srv/site1`
-* Le script peut sauvegarder tous les sites en passant `all` comme argument
-* Le script écrit les logs dans le fichier `/var/log/backup.log`
-[Voir le script](tp1_backup.sh)
+* Ecrire un script
+
+    **Caractéristiques du script**
+    * s'appelle `tp1_backup.sh`
+    * sauvegarde les deux sites web
+    * c'est à dire qu'il crée une archive compressée pour chacun des sites
+    * les noms des archives contiennent le nom du site sauvegardé ainsi que la date et heure de la sauvegarde
+    * par exemple `site1_20200923_2358` (pour le 23 Septembre 2020 à 23h58)
+    * Garde que 7 exemplaires de sauvegardes
+    * à la huitième sauvegarde réalisée, la plus ancienne est supprimée
+    * Le script sauvegarde un seul site à la fois en passant le dossier par argument
+    * on peut donc appeler le script en faisant `tp1_backup.sh /srv/site1` afin de déclencher une sauvegarde de `/srv/site1`
+    * Le script peut sauvegarder tous les sites en passant `all` comme argument
+    * Le script écrit les logs dans le fichier `/var/log/backup.log`
+    [Voir le script](tp1_backup.sh)
+
+* Ajout d'un utilisateur `backup` ainsi que ses compléments necessaires au bon fonctionnement du script
+  
+    ```
+    [root@node1 ~]# adduser backup
+    [root@node1 ~]# passwd backup
+    ```
+    On ajoute le groupe nginx_group à l'utilisateur backup pour qu'il puisse intéragire avec les sites.
+    ```
+    [root@node1 ~]# gpasswd -a backup nginx_group
+    ```
+    Création d'un dossier `backup` où sera stocké les .tar.gz
+    ```
+    [root@node1 ~]# mkdir /srv/backup
+    [root@node1 ~]# chown backup:backup /srv/backup
+    [root@node1 ~]# chmod 700 /srv/backup
+    ```
+    Modification des droits des dossiers/fichiers
+    ```
+    [root@node1 ~]# ls -al /srv
+    drwx------.  2 backup     backup       278 Sep 25 19:06 backup
+    dr-xr-x---.  3 nginx_user nginx_group 4096 Sep 24 12:01 site1
+    dr-xr-x---.  3 nginx_user nginx_group 4096 Sep 24 12:01 site2
+    -rwx------.  1 backup     backup      1159 Sep 25 18:20 tp1_backup.sh
+
+    [root@node1 ~]# ls -al /srv/site1
+    -r--r-----. 1 nginx_user nginx_group     7 Sep 24 12:01 index.html
+    dr--r-----. 2 nginx_user nginx_group 16384 Sep 23 11:42 lost+found
+    ```
+
+
+* Utiliser la crontab pour que le script s'exécute automatiquement toutes les heures.
+
+    Modification du crontab de l'utilisateur `backup` avec la commande `crontab -u backup -e`, en ajoutant la ligne `0 * * * * sh /srv/tp1_backup.sh all` pour éxecuter le script toutes les heures.
