@@ -15,7 +15,8 @@ PATH_ARG=$1
 
 function compress {
     SITE=$( echo $1 | cut -d'/' -f3)
-    tar -zcvf ${PATH_BACKUP}${SITE}_$(date "+%Y%m%d_%H%M").tar.gz -P /srv/${SITE} >> ${LOG_FILE}
+    tar -zcvf ${PATH_BACKUP}${SITE}_$(date "+%Y%m%d_%H%M").tar.gz -P /srv/${SITE} &>/dev/null
+    echo $'\t' "${SITE} was compressed on $(date "+%b %m, %Y at %Hh%M")" >> ${LOG_FILE}
     delete_oldest ${SITE}
 
 }
@@ -27,13 +28,13 @@ function delete_oldest {
     OLDEST_FILES=$(ls -1t ${PATH_BACKUP}$1* | grep .tar.gz | tail -n +8)
     for file in ${OLDEST_FILES}; do
         rm -f ${file}
-        echo "${file} was deleted" >> ${LOG_FILE}
+        echo $'\t' "$(echo ${file} | cut -d'/' -f4) was deleted" >> ${LOG_FILE}
     done;
 }
 
 # === START ===
 
-echo "---- BACKUP SCRIPT START ----" >> ${LOG_FILE}
+echo $'\n' "---- BACKUP SCRIPT START ----" >> ${LOG_FILE}
 
 if [ ! -z ${PATH_ARG} ] && ([ ${PATH_ARG} == ${PATH_SITE1} ] || [ ${PATH_ARG} == ${PATH_SITE2} ]); then
     compress ${PATH_ARG}

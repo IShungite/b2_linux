@@ -385,6 +385,12 @@
     [root@node1 ~]# chown backup:backup /srv/backup
     [root@node1 ~]# chmod 700 /srv/backup
     ```
+    Création d'un fichier de log où les logs du script seront stockés
+    ```
+    [root@node1 ~]# touch /var/log/backup.logs
+    [root@node1 ~]# chown backup:backup /var/log/backup.logs
+    [root@node1 ~]# chmod 700 /var/log/backup.logs
+    ```
     Modification des droits des dossiers/fichiers
     ```
     [root@node1 ~]# ls -al /srv
