@@ -15,9 +15,13 @@ PATH_ARG=$1
 
 function compress {
     SITE=$( echo $1 | cut -d'/' -f3)
-    tar -zcvf ${PATH_BACKUP}${SITE}_$(date "+%Y%m%d_%H%M").tar.gz -P /srv/${SITE} &>/dev/null
-    echo $'\t' "${SITE} was compressed on $(date "+%b %m, %Y at %Hh%M")" >> ${LOG_FILE}
-    delete_oldest ${SITE}
+    {
+        tar -zcvf ${PATH_BACKUP}${SITE}_$(date "+%Y%m%d_%H%M").tar.gz -P /srv/${SITE} 2>> ${LOG_FILE} 1>/dev/null
+        delete_oldest ${SITE}
+        echo $'\t' "${SITE} was compressed on $(date "+%b %m, %Y at %Hh%M")" >> ${LOG_FILE}
+    } || {
+        echo "/!\ - ERROR WHILE COMPRESS"
+    }
 
 }
 function compress_all {
