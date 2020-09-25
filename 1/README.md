@@ -430,3 +430,101 @@
     Active: activating (auto-restart) since Fri 2020-09-25 21:22:47 CEST; 6s ago
     Main PID: 6136 (code=exited, status=0/SUCCESS)
     ```
+
+## III. Monitoring, alerting
+
+*  Mettre en place l'outil Netdata en suivant les instructions officielles et s'assurer de son bon fonctionnement.
+
+    Installer netdata
+
+    `bash <(curl -Ss https://my-netdata.io/kickstart.sh)`
+
+    Ouvrir les ports
+
+    `[root@node1 ~]# firewall-cmd --add-port=19999/tcp --permanent`
+
+*  Configurer Netdata pour qu'ils vous envoient des alertes dans un salon Discord dédié
+    
+    Créer un webhook sur discord. [voir ici](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+
+    Configurer netdata avec discord
+    ```
+    [root@node1 ~]# /etc/netdata/edit-config health_alarm_notify.conf
+    ```
+    Chercher la ligne avec `DISCORD_WEBHOOK_URL=""` et ajout le lien du webhook créé précédement
+    ```
+    DISCORD_WEBHOOK_URL="https://discordapp.com/api/webhooks/451245198745120469/nKF_pEXXXXXXXXXXXXXX-XXXXXXXXXXXXXbl6Oc7KXXXXXXXK918ODZXovTmLaELIvIc"
+    ```
+
+    Une fois fait nous pouvons tester si la liaison entre netdata et discord s'est bien faite
+    ```
+    # become user netdata
+    su -s /bin/bash netdata
+
+    # enable debugging info on the console
+    export NETDATA_ALARM_NOTIFY_DEBUG=1
+
+    # send test alarms to sysadmin
+    /usr/libexec/netdata/plugins.d/alarm-notify.sh test
+    ```
+
+    Fichier de configuration de nginx (la conf de netdata a été trouvé [ici](https://learn.netdata.cloud/docs/agent/running-behind-nginx))
+    ```
+    user nginx_user;
+
+    worker_processes 1;
+    error_log nginx_error.log;
+    pid /run/nginx.pid;
+
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        upstream netdata {
+            server 127.0.0.1:19999;
+            keepalive 64;
+        }
+
+        server {
+            listen 80;
+
+            server_name node1.tp1.b2;
+
+            location / {
+                return 301 /site1;
+            }
+
+            location /site1 {
+                alias /srv/site1;
+            }
+            location /site2 {
+                alias /srv/site2;
+            }
+
+            location = /netdata {
+                return 301 /netdata/;
+            }
+
+            location ~ /netdata/(?<ndpath>.*) {
+                proxy_redirect off;
+                proxy_set_header Host $host;
+
+                proxy_set_header X-Forwarded-Host $host;
+                proxy_set_header X-Forwarded-Server $host;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_http_version 1.1;
+                proxy_pass_request_headers on;
+                proxy_set_header Connection "keep-alive";
+                proxy_store off;
+                proxy_pass http://netdata/$ndpath$is_args$args;
+
+                gzip on;
+                gzip_proxied any;
+                gzip_types *;
+            }
+        }
+    }
+    ```
+
+    C'est parfait !
