@@ -231,10 +231,10 @@
     * Les permissions sur ces dossiers doivent être le plus restrictif possible
 
         ```
-        drwxr-xr-x.  3 nginx_user nginx_group 4096 Sep 24 10:12 site1
-        drwxr-xr-x.  3 nginx_user nginx_group 4096 Sep 24 10:12 site2
+        dr-x------.  3 nginx_user nginx_group 4096 Sep 24 10:12 site1
+        dr-x------.  3 nginx_user nginx_group 4096 Sep 24 10:12 site2
 
-        -rw-r--r--. 1 nginx_user nginx_group    13 Sep 24 10:12 index.html
+        -r--------. 1 nginx_user nginx_group    13 Sep 24 10:12 index.html
         ```
     * Ces dossiers doivent appartenir à un utilisateur et un groupe spécifique
 
