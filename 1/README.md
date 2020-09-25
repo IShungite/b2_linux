@@ -451,12 +451,12 @@
     ```
     [root@node1 ~]# /etc/netdata/edit-config health_alarm_notify.conf
     ```
-    Chercher la ligne avec `DISCORD_WEBHOOK_URL=""` et ajout le lien du webhook créé précédement
+    Chercher la ligne avec `DISCORD_WEBHOOK_URL=""` et ajouter le lien du webhook créé précédement
     ```
     DISCORD_WEBHOOK_URL="https://discordapp.com/api/webhooks/451245198745120469/nKF_pEXXXXXXXXXXXXXX-XXXXXXXXXXXXXbl6Oc7KXXXXXXXK918ODZXovTmLaELIvIc"
     ```
 
-    Une fois fait nous pouvons tester si la liaison entre netdata et discord s'est bien faite
+    Une fois fait nous pouvons tester si la liaison entre netdata et discord s'est bien faite 
     ```
     # become user netdata
     su -s /bin/bash netdata
