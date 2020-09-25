@@ -408,3 +408,25 @@
 * Utiliser la crontab pour que le script s'exécute automatiquement toutes les heures.
 
     Modification du crontab de l'utilisateur `backup` avec la commande `crontab -u backup -e`, en ajoutant la ligne `0 * * * * sh /srv/tp1_backup.sh all` pour éxecuter le script toutes les heures.
+
+* Créer une unité systemd qui permet de déclencher le script de backup
+
+    Création du service
+    ```
+    [root@node1 ~]# vim /etc/systemd/system/backup.service
+    [Unit]
+    Description=Start backup every hours
+
+    [Service]
+    User=backup
+    Restart=always
+    RestartSec=3600s
+    ExecStart=/bin/bash /srv/tp1_backup.sh all
+
+    [root@node1 ~]# systemctl start backup
+    [root@node1 ~]# systemctl status backup
+    ? backup.service - Start backup every hours
+    Loaded: loaded (/etc/systemd/system/backup.service; static; vendor preset: disabled)
+    Active: activating (auto-restart) since Fri 2020-09-25 21:22:47 CEST; 6s ago
+    Main PID: 6136 (code=exited, status=0/SUCCESS)
+    ```
