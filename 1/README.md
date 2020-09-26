@@ -2,42 +2,42 @@
 
 ## 0. Prérequis
 
-**Setup de deux machines CentOS7 configurée de façon basique.**
+**Setup de deux machines CentOS7 configurées de façon basique**
 
 * Partitionnement
 
-    * Création du volume physique
+    Création du volume physique
 
-        `pvcreate /dev/sdb`
+    `pvcreate /dev/sdb`
 
-    * Création du Volume Groupe 
+    Création du Volume Groupe 
         
-        `vgcreate data /dev/sdb`
+    `vgcreate data /dev/sdb`
 
-    * Création des Logical Volumes
+    Création des Logical Volumes
 
-        `lvcreate -L 2G data`
-        `lvcreate -l +100%FREE data`
+    `lvcreate -L 2G data`
+    `lvcreate -l +100%FREE data`
 
-    * Création des dossiers de montage
+    Création des dossiers de montage
 
-        `mkdir /srv/site1 /srv/site2`
+    `mkdir /srv/site1 /srv/site2`
 
-    * Formatage des partitions
+    Formatage des partitions
 
-        `mkfs.ext4 /dev/data/lvol0`
-        `mkfs.ext4 /dev/data/lvol1`
+    `mkfs.ext4 /dev/data/lvol0`
+    `mkfs.ext4 /dev/data/lvol1`
         
-    * Montage des partitions
+    Montage des partitions
 
-        `mount /dev/data/lvol0 /srv/site1`
-        `mount /dev/data/lvol1 /srv/site2`
+    `mount /dev/data/lvol0 /srv/site1`
+    `mount /dev/data/lvol1 /srv/site2`
 
-    * Définition d'un montage automatique lors du boot de la machine
+    Définition d'un montage automatique lors du boot de la machine
         
-        Ajout des lignes `/dev/data/lvol0 /srv/site1 ext4 defaults 0 0` et `/dev/data/lvol1 /srv/site2 ext4 defaults 0 0` dans `/etc/fstab`
+    Ajout des lignes `/dev/data/lvol0 /srv/site1 ext4 defaults 0 0` et `/dev/data/lvol1 /srv/site2 ext4 defaults 0 0` dans `/etc/fstab`
     
-    * Vérification
+    Vérification
 
         ```
         [root@node1 ~]# mount -av
@@ -50,164 +50,169 @@
 
 * Un accès internet
 
-    * Activation de la carte NAT
+    Carte NAT
+    ```
+    2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether 08:00:27:fe:e7:b8 brd ff:ff:ff:ff:ff:ff
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global noprefixroute dynamic enp0s3
+       valid_lft 86345sec preferred_lft 86345sec
+    inet6 fe80::f926:8b07:9aab:8194/64 scope link noprefixroute
+       valid_lft forever preferred_lft forever
+    ```
+
 
 * Un accès à un réseau local (les deux machines peuvent se ping)
 
-    * Ping entre les VM
+    Ping entre les VM
 
-        ```
-        [root@node1 ~]# ping 192.168.1.12
-        PING 192.168.1.12 (192.168.1.12) 56(84) bytes of data.
-        64 bytes from 192.168.1.12: icmp_seq=1 ttl=64 time=0.629 ms
-        64 bytes from 192.168.1.12: icmp_seq=2 ttl=64 time=0.976 ms
+    ```
+    [root@node1 ~]# ping 192.168.1.12
+    PING 192.168.1.12 (192.168.1.12) 56(84) bytes of data.
+    64 bytes from 192.168.1.12: icmp_seq=1 ttl=64 time=0.629 ms
+    64 bytes from 192.168.1.12: icmp_seq=2 ttl=64 time=0.976 ms
 
-        [root@node2 ~]# ping 192.168.1.11
-        PING 192.168.1.11 (192.168.1.11) 56(84) bytes of data.
-        64 bytes from 192.168.1.11: icmp_seq=1 ttl=64 time=0.434 ms
-        64 bytes from 192.168.1.11: icmp_seq=2 ttl=64 time=0.470 ms
-        ```
+    [root@node2 ~]# ping 192.168.1.11
+    PING 192.168.1.11 (192.168.1.11) 56(84) bytes of data.
+    64 bytes from 192.168.1.11: icmp_seq=1 ttl=64 time=0.434 ms
+    64 bytes from 192.168.1.11: icmp_seq=2 ttl=64 time=0.470 ms
+    ```
   
 * Les machines doivent avoir un nom
 
-    * Hostname des deux VM
+    Hostname des deux VM
 
-        ```
-        [root@node2 ~]# hostname
-        node2.tp1.
-        ```
+    ```
+    [root@node2 ~]# hostname
+    node2.tp1.
+    ```
 
 * Les machines doivent pouvoir se joindre par leurs noms respectifs
 
-    * Ajout d'un host des VM
+    Ajout d'un host des VM
 
-        ```
-        [root@node1 ~]# cat /etc/hosts
-        192.168.1.12 node2.tp1.b2
-        [root@node1 ~]# ping node2.tp1.b2
-        PING node2.tp1.b2 (192.168.1.12) 56(84) bytes of data.
-        64 bytes from node2.tp1.b2 (192.168.1.12): icmp_seq=1 ttl=64 time=0.583 ms
+    ```
+    [root@node1 ~]# cat /etc/hosts
+    192.168.1.12 node2.tp1.b2
+    [root@node1 ~]# ping node2.tp1.b2
+    PING node2.tp1.b2 (192.168.1.12) 56(84) bytes of data.
+    64 bytes from node2.tp1.b2 (192.168.1.12): icmp_seq=1 ttl=64 time=0.583 ms
 
-        [root@node2 ~]# cat /etc/hosts
-        192.168.1.11 node1.tp1.b2
-        [root@node2 ~]# ping node1.tp1.b2
-        PING node1.tp1.b2 (192.168.1.11) 56(84) bytes of data.
-        64 bytes from node1.tp1.b2 (192.168.1.11): icmp_seq=1 ttl=64 time=0.399 ms
-
-        ```
+    [root@node2 ~]# cat /etc/hosts
+    192.168.1.11 node1.tp1.b2
+    [root@node2 ~]# ping node1.tp1.b2
+    PING node1.tp1.b2 (192.168.1.11) 56(84) bytes of data.
+    64 bytes from node1.tp1.b2 (192.168.1.11): icmp_seq=1 ttl=64 time=0.399 ms
+    ```
 
 * Un utilisateur administrateur est créé sur les deux machines (il peut exécuter des commandes sudo en tant que root)
 
-    * Ajout d'un utilisateur
+    Ajout d'un utilisateur
 
-        ```
-        [root@node1 ~]# adduser admin
-        [root@node1 ~]# passwd admin
-        Changing password for user admin.
-        New password:
-        BAD PASSWORD: The password is shorter than 8 characters
-        Retype new password:
-        passwd: all authentication tokens updated successfully.
-        [root@node1 ~]# usermod -aG wheel admin
-        [admin@node1 ~]$ sudo whoami
-        root
-        ```
+    ```
+    [root@node1 ~]# adduser admin
+    [root@node1 ~]# passwd admin
+    Changing password for user admin.
+    New password:
+    BAD PASSWORD: The password is shorter than 8 characters
+    Retype new password:
+    passwd: all authentication tokens updated successfully.
+    [root@node1 ~]# usermod -aG wheel admin
+    [admin@node1 ~]$ sudo whoami
+    root
+    ```
 
 * Vous n'utilisez QUE ssh pour administrer les machines
 
-    * Fichier config de enp0s8
+    Ajout d'un Host-Only, config de enp0s8
+    ```
+    [admin@node1 ~]$ cat /etc/sysconfig/network-scripts/ifcfg-enp0s8
+    NAME=enp0s8
+    DEVICE=enp0s8
 
-        ```
-        [admin@node1 ~]$ cat /etc/sysconfig/network-scripts/ifcfg-enp0s8
-        NAME=enp0s8
-        DEVICE=enp0s8
+    BOOTPROTO=static
+    ONBOOT=yes
 
-        BOOTPROTO=static
-        ONBOOT=yes
-
-        IPADDR=192.168.1.11
-        NETMASK=255.255.255.0
-        ```
+    IPADDR=192.168.1.11
+    NETMASK=255.255.255.0
+    ```
         
-        * Status de ssh
+    Status de ssh
+    ```
+    [admin@node1 ~]$ systemctl status sshd
+    ? sshd.service - OpenSSH server daemon
+    Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; vendor preset: enabled)
+    Active: active (running) since Wed 2020-09-23 12:21:22 CEST; 22min ago
+        Docs: man:sshd(8)
+            man:sshd_config(5)
+    Main PID: 1081 (sshd)
+    CGroup: /system.slice/sshd.service
+            ??1081 /usr/sbin/sshd -D
 
-        ```
-        [admin@node1 ~]$ systemctl status sshd
-        ? sshd.service - OpenSSH server daemon
-        Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; vendor preset: enabled)
-        Active: active (running) since Wed 2020-09-23 12:21:22 CEST; 22min ago
-            Docs: man:sshd(8)
-                man:sshd_config(5)
-        Main PID: 1081 (sshd)
-        CGroup: /system.slice/sshd.service
-                ??1081 /usr/sbin/sshd -D
+    Sep 23 12:21:22 node1.tp1.b2 systemd[1]: Starting OpenSSH server daemon...
+    Sep 23 12:21:22 node1.tp1.b2 sshd[1081]: Server listening on 0.0.0.0 port 22.
+    Sep 23 12:21:22 node1.tp1.b2 sshd[1081]: Server listening on :: port 22.
+    Sep 23 12:21:22 node1.tp1.b2 systemd[1]: Started OpenSSH server daemon.
+    Sep 23 12:22:57 node1.tp1.b2 sshd[1346]: Accepted password for root from 192.168.1.1 port 52894 ssh2
+    Sep 23 12:31:53 node1.tp1.b2 sshd[1373]: Accepted password for root from 192.168.1.1 port 52934 ssh2
+    ```
 
-        Sep 23 12:21:22 node1.tp1.b2 systemd[1]: Starting OpenSSH server daemon...
-        Sep 23 12:21:22 node1.tp1.b2 sshd[1081]: Server listening on 0.0.0.0 port 22.
-        Sep 23 12:21:22 node1.tp1.b2 sshd[1081]: Server listening on :: port 22.
-        Sep 23 12:21:22 node1.tp1.b2 systemd[1]: Started OpenSSH server daemon.
-        Sep 23 12:22:57 node1.tp1.b2 sshd[1346]: Accepted password for root from 192.168.1.1 port 52894 ssh2
-        Sep 23 12:31:53 node1.tp1.b2 sshd[1373]: Accepted password for root from 192.168.1.1 port 52934 ssh2
-        ```
+    Setup des des clés ssh
 
-    * Setup des des clés ssh
+    *Sur le serveur*
 
-        **Sur le serveur**
-        ```
-        [root@node1 ~]# mkdir ~/.ssh
-        [root@node1 ~]# touch ~/.ssh/authorized_keys
-        [root@node1 ~]# chmod 700 ~/.ssh
-        [root@node1 ~]# chmod 600 ~/.ssh/authorized_keys
-        ```
-        Modification du fichier ``/etc/ssh/sshd_config`
-        ```
-            PubkeyAuthentication yes
-        ```
+    ```
+    [root@node1 ~]# mkdir ~/.ssh
+    [root@node1 ~]# touch ~/.ssh/authorized_keys
+    [root@node1 ~]# chmod 700 ~/.ssh
+    [root@node1 ~]# chmod 600 ~/.ssh/authorized_keys
+    ```
+    Modification du fichier `/etc/ssh/sshd_config`
+    ```
+    PubkeyAuthentication yes
+    ```
 
-        **Sur le client**
-        ```powershell
-        PS C:\Users\ianis> ssh-keygen
-        Generating public/private rsa key pair.
-        Enter file in which to save the key (C:\Users\ianis/.ssh/id_rsa): C:\Users\ianis/.ssh/id_rsa_linux
-        Enter passphrase (empty for no passphrase):
-        Enter same passphrase again:
-        Your identification has been saved in C:\Users\ianis/.ssh/id_rsa_linux.
-        Your public key has been saved in C:\Users\ianis/.ssh/id_rsa_linux.pub.
+    *Sur le client*
+    ```
+    PS C:\Users\ianis> ssh-keygen
+    Generating public/private rsa key pair.
+    Enter file in which to save the key (C:\Users\ianis/.ssh/id_rsa): C:\Users\ianis/.ssh/id_rsa_linux
+    Enter passphrase (empty for no passphrase):
+    Enter same passphrase again:
+    Your identification has been saved in C:\Users\ianis/.ssh/id_rsa_linux.
+    Your public key has been saved in C:\Users\ianis/.ssh/id_rsa_linux.pub.
 
-        PS C:\Users\ianis> scp C:\Users\ianis/.ssh/id_rsa_linux.pub root@192.168.1.11:.ssh/authorized_keys
-        root@192.168.1.11's password:
-        id_rsa_linux.pub                                                                      100%  398   202.3KB/s   00:00
-        ```
+    PS C:\Users\ianis> scp C:\Users\ianis/.ssh/id_rsa_linux.pub root@192.168.1.11:.ssh/authorized_keys
+    root@192.168.1.11's password:
+    id_rsa_linux.pub                                                                      100%  398   202.3KB/s   00:00
+    ```
 
-        Ajout dans le fichier de config de ssh (C:\Users\ianis\\.ssh\config) :
-        ```
-        Host 192.168.1.11
-            IdentityFile C:\Users\ianis\.ssh\id_rsa_linux
-        Host 192.168.1.12
-            IdentityFile C:\Users\ianis\.ssh\id_rsa_linux
-        ```
-
+    Ajout dans le fichier de config de ssh `C:\Users\ianis\\.ssh\config`
+    ```
+    Host 192.168.1.11
+        IdentityFile C:\Users\ianis\.ssh\id_rsa_linux
+    Host 192.168.1.12
+        IdentityFile C:\Users\ianis\.ssh\id_rsa_linux
+    ```
 
 * le pare-feu est configuré pour bloquer toutes les connexions exceptées celles qui sont nécessaires
 
-    * Affichage du pare-feu
-
-        ```
-        [root@node1 ~]# firewall-cmd --list-all
-        public (active)
-        target: default
-        icmp-block-inversion: no
-        interfaces: enp0s3 enp0s8
-        sources:
-        services: dhcpv6-client ssh
-        ports: 22/tcp
-        protocols:
-        masquerade: yes
-        forward-ports:
-        source-ports:
-        icmp-blocks:
-        rich rules:
-        ```
+    Affichage du pare-feu
+    ```
+    [root@node1 ~]# firewall-cmd --list-all
+    public (active)
+    target: default
+    icmp-block-inversion: no
+    interfaces: enp0s3 enp0s8
+    sources:
+    services: dhcpv6-client ssh
+    ports: 22/tcp
+    protocols:
+    masquerade: yes
+    forward-ports:
+    source-ports:
+    icmp-blocks:
+    rich rules:
+    ```
 
 ## I. Setup serveur Web
 
@@ -361,6 +366,7 @@
     * c'est à dire qu'il crée une archive compressée pour chacun des sites
     * les noms des archives contiennent le nom du site sauvegardé ainsi que la date et heure de la sauvegarde
     * par exemple `site1_20200923_2358` (pour le 23 Septembre 2020 à 23h58)
+    * Les archives se mettent dans `/srv/backup/`
     * Garde que 7 exemplaires de sauvegardes
     * à la huitième sauvegarde réalisée, la plus ancienne est supprimée
     * Le script sauvegarde un seul site à la fois en passant le dossier par argument
@@ -411,7 +417,6 @@
 
 * Créer une unité systemd qui permet de déclencher le script de backup
 
-    Création du service
     ```
     [root@node1 ~]# vim /etc/systemd/system/backup.service
     [Unit]
@@ -451,7 +456,7 @@
     ```
     [root@node1 ~]# /etc/netdata/edit-config health_alarm_notify.conf
     ```
-    Chercher la ligne avec `DISCORD_WEBHOOK_URL=""` et ajouter le lien du webhook créé précédement
+    Chercher la ligne avec `DISCORD_WEBHOOK_URL=""` et ajouter le lien du webhook créé précédemment
     ```
     DISCORD_WEBHOOK_URL="https://discordapp.com/api/webhooks/451245198745120469/nKF_pEXXXXXXXXXXXXXX-XXXXXXXXXXXXXbl6Oc7KXXXXXXXK918ODZXovTmLaELIvIc"
     ```
@@ -527,4 +532,4 @@
     }
     ```
 
-    C'est parfait !
+    C'est fini !
