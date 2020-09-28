@@ -306,6 +306,8 @@
 
       [root@node1 ~]# mv server.crt /etc/pki/tls/certs/node1.tp1.b2.crt
       [root@node1 ~]# mv server.key /etc/pki/tls/private/node1.tp1.b2.key
+      [root@node1 ~]# chmod 400 /etc/pki/tls/private/node1.tp1.b2.key
+      [root@node1 ~]# chmod 400 /etc/pki/tls/certs/node1.tp1.b2.crt
       ```
 
       Fichier de configuration de nginx
