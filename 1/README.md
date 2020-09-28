@@ -444,14 +444,14 @@
   ls -al /srv/
   drwxr-x---.  2 backup     backup        40 Sep 28 10:10 backup
   drwxr-x---.  3 nginx_user nginx_group 4096 Sep 24 12:01 site1
-  dr-xr-x---.  3 nginx_user nginx_group 4096 Sep 24 12:01 site2
+  drwxr-x---.  3 nginx_user nginx_group 4096 Sep 24 12:01 site2
 
   ls -al /srv/site1/
   -rw-r-x---. 1 nginx_user nginx_group 7 Sep 24 12:01 index.html
   drw-r-x---. 2 nginx_user nginx_group 16384 Sep 23 11:42 lost+found
   ```
 
-  On ajoute l'utilisateur `backup` au groupe `nginx_group`
+  On ajoute l'utilisateur `nginx_user` au groupe `backup`
 
   ```
    gpasswd -a nginx_user backup
