@@ -520,6 +520,12 @@
   DISCORD_WEBHOOK_URL="https://discordapp.com/api/webhooks/451245198745120469/nKF_pEXXXXXXXXXXXXXX-XXXXXXXXXXXXXbl6Oc7KXXXXXXXK918ODZXovTmLaELIvIc"
   ```
 
+  Chercher la ligne avec `DEFAULT_RECIPIENT_DISCORD="alarms"`, modifier avec notre salon discord
+
+  ```
+  DEFAULT_RECIPIENT_DISCORD="netdata_alert"
+  ```
+
   Une fois fait nous pouvons tester si la liaison entre netdata et discord s'est bien faite
 
   ```
