@@ -588,6 +588,46 @@
               gzip_types *;
           }
       }
+      server {
+          listen 443 ssl;
+
+          server_name node1.tp1.b2;
+          ssl_certificate /etc/pki/tls/certs/node1.tp1.b2.crt;
+          ssl_certificate_key /etc/pki/tls/private/node1.tp1.b2.key;
+
+          location / {
+          return 301 /site1;
+          }
+
+          location /site1 {
+              alias /srv/site1;
+          }
+          location /site2 {
+              alias /srv/site2;
+          }
+
+          location = /netdata {
+              return 301 /netdata/;
+          }
+
+          location ~ /netdata/(?<ndpath>.*) {
+              proxy_redirect off;
+              proxy_set_header Host $host;
+
+              proxy_set_header X-Forwarded-Host $host;
+              proxy_set_header X-Forwarded-Server $host;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_http_version 1.1;
+              proxy_pass_request_headers on;
+              proxy_set_header Connection "keep-alive";
+              proxy_store off;
+              proxy_pass http://netdata/$ndpath$is_args$args;
+
+              gzip on;
+              gzip_proxied any;
+              gzip_types *;
+          }
+      }
   }
   ```
 
