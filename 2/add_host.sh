@@ -1,0 +1,1 @@
+echo "192.168.1.11 node1.tp2.b2" >> /etc/hosts

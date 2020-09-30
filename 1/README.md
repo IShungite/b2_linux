@@ -83,7 +83,7 @@
 
   ```
   [root@node2 ~]# hostname
-  node2.tp1.
+  node2.tp1.b2
   ```
 
 - Les machines doivent pouvoir se joindre par leurs noms respectifs
