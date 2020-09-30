@@ -56,8 +56,7 @@
   ```
   yum install vim -y
   ```
-- ajout d'un deuxième disque de 5Go à la VM
-  A la première ligne
+- ajout d'un deuxième disque de 5Go à la VM à la première ligne
 
   ```
   disk = './secondDisk.vdi'
