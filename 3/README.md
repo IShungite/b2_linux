@@ -118,11 +118,9 @@ After=network.target remote-fs.target nss-lookup.target
 [Service]
 User=web
 Environment="WEB_PORT=8080"
-ExecStartPre=+/usr/bin/firewall-cmd --add-port=${WEB_PORT}/tcp --permanent
-ExecStartPre=+/usr/bin/firewall-cmd --reload
+ExecStartPre=+/usr/bin/firewall-cmd --add-port=${WEB_PORT}/tcp
 ExecStart=/usr/bin/python3 -m http.server ${WEB_PORT}
-ExecStop=+/usr/bin/firewall-cmd --remove-port=${WEB_PORT}/tcp --permanent
-ExecStop=+/usr/bin/firewall-cmd --reload
+ExecStop=+/usr/bin/firewall-cmd --remove-port=${WEB_PORT}/tcp
 
 [Install]
 WantedBy=multi-user.target
