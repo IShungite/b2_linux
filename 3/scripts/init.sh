@@ -1,11 +1,16 @@
+yum install -y python3 epel-release nginx
+
+sudo systemctl enable firewalld.service
+systemctl start firewalld
+
 nginxUser="web"
 nginxGroup="web"
 
 site1Path="/srv/site1"
 site2Path="/srv/site2"
 
-backupUser="backup_user"
-backupGroup="backup_group"
+backupUser="backup"
+backupGroup="backup"
 backupPath="/opt/backup/"
 
 mkdir "${site1Path}" "${site2Path}"

@@ -113,6 +113,7 @@ grep -rnw /usr/lib/systemd/system /etc/systemd/system /run/systemd/system /usr/l
 ```
 [Unit]
 Description=Web server description
+After=network.target remote-fs.target nss-lookup.target
 
 [Service]
 User=web
@@ -139,6 +140,12 @@ WantedBy=multi-user.target
   Main PID: 4689 (python3)
   CGroup: /system.slice/web.service
           ?? 4689 /usr/bin/python3 -m http.server 8080
+  ```
+
+- faites en sorte que le service s'allume au démarrage de la machine
+
+  ```
+  [vagrant@node1 ~]$ sudo systemctl enable web
   ```
 
 - prouver que le serveur web est bien fonctionnel
