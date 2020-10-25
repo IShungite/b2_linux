@@ -2,7 +2,7 @@
 
 ## 0. Prerequisites
 
-Box pour le tp [Ici](base-box/)
+La box utilisée lors du tp est une Centos 7, avec ce [script](scripts/tp4/base-box/init.sh) de lancé.
 
 ## I. Consignes générales
 
